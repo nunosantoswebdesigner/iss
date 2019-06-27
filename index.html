@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Where is Iss now?</title>
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<meta name="author" content="" />
+	<link rel="shortcut icon" href="favicon.ico">	
+	<link rel="stylesheet" type="text/css" href="fonts/feather/style.css">
+	<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	<link rel="stylesheet" type="text/css" href="css/component.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+    <script type="text/javascript" src=" https://maps.googleapis.com/maps/api/js?key=AIzaSyBZzVYMBraoo634nv9PYU7Gt9Aa96lEsJo"></script>
+</head>
+<body class="loading">
+	<div class="container">
+		<header class="bp-header cf">
+			<span>Nuno Santos <span class="bp-icon bp-icon-about" data-content="Este pequeno projecto mostra em tempo real a localização precisda da Estação Espacial em latitude e longitude. Também usei duas APIS, a 'openstreetmap' para colocar o mapa no ecrã e a 'wheretheiss' para saber a localização do ISS. Ambas grátis e open source."></span></span>
+			<h1>Where is the ISS?</h1>
+			<nav>
+				<a href="" class="bp-icon bp-icon-prev" data-info="last sketch"><span>last sketch</span></a>
+				<a href="" class="bp-icon bp-icon-next" data-info="next sketch"><span>next sketch</span></a>
+				<a href="" class="bp-icon bp-icon-drop" data-info="back to site"><span>back to site</span></a>
+				<a href="https://github.com/nunosantoswebdesigner/iss" class="bp-icon bp-icon-archive" data-info="code repo"><span>code repo</span></a>
+			</nav>
+		</header>
+		<section class="slider">
+            <p class="slider_item_value">latitude: <span id="lat"></span>°</p>
+            <p class="slider_item_value last">longitude: <span id="lon"></span>°</p>
+            <div id="issMap"></div>
+		</section>
+	</div>
+    <script>
+    
+        // Making a map and tiles
+        const mymap = L.map('issMap').setView([0, 0], 1);
+        const attribution =
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+        const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const tiles = L.tileLayer(tileUrl, { attribution });
+        tiles.addTo(mymap);
+
+        // Making a marker with a custom icon
+        const issIcon = L.icon({
+        iconUrl: 'iss200.png',
+        iconSize: [100, 100],
+        iconAnchor: [25, 16]
+        });
+        const marker = L.marker([0, 0], { icon: issIcon }).addTo(mymap);
+
+        const api_url = 'https://api.wheretheiss.at/v1/satellites/25544';
+
+        let firstTime = true;
+
+        async function getISS() {
+        const response = await fetch(api_url);
+        const data = await response.json();
+        const { latitude, longitude } = data;
+
+        marker.setLatLng([latitude, longitude]);
+        if (firstTime) {
+            mymap.setView([latitude, longitude], 2);
+            firstTime = false;
+        }
+        document.getElementById('lat').textContent = latitude.toFixed(2);
+        document.getElementById('lon').textContent = longitude.toFixed(2);
+        }
+
+        getISS();
+
+        setInterval(getISS, 1000);
+
+        function myPreload() {
+            setTimeout(function(){
+                document.body.classList.remove('loading');
+            }, 3000);
+        }
+        myPreload()
+    </script>
+</body>
+</html>
